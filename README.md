@@ -8,7 +8,8 @@
 * Display connected users in small text for edgemap UI
 * Review/implement security updates from [iJazzel](<https://github.com/iJazzel/rpi4edgemap>)
 ## __**Features**__
-* Pipe existing [Meshchat](<https://github.com/liamcottle/reticulum-meshchat>) audio codec and call address function to Edgemap UI for simplex comms.(This may already be achieved with *SecurePTT* possibly with selectable users from announcements
+* Pipe existing [Meshchat](<https://github.com/liamcottle/reticulum-meshchat>) audio codec and call address function to Edgemap UI for simplex comms.(This may already be achieved with *SecurePTT* possibly with selectable users from announcements.
+* * Implement contacts as place holders for LXMF addresses and Audio Call addresses, for ease of use. **NEW*
 # Edgemap for RPi4
 
 Edgemap is small project built on embedded ARM targets like RaspberryPi4 and Raspberry Pi Zero 2W. It can be cross compiled to various other platforms and integrated to work with AMD64 based PC architectures. 
