@@ -1,3 +1,14 @@
+# Current TO-DO for this fork:
+## __**Updates**__
+* Update RNS stack to 0.8.8
+* Update Meshchat to v1.13.2
+* Future to update without breaking links/dependencies
+## __**Security**__
+* ~~SSL/CA cert~~ Done 09DEC24 -HotMic
+* Display connected users in small text for edgemap UI
+* Review/implement security updates from [iJazzel](<https://github.com/iJazzel/rpi4edgemap>)
+## __**Features**__
+* Pipe existing [Meshchat](<https://github.com/liamcottle/reticulum-meshchat>) audio codec and call address function to Edgemap UI for simplex comms.(This may already be achieved with *SecurePTT* possibly with selectable users from announcements
 # Edgemap for RPi4
 
 Edgemap is small project built on embedded ARM targets like RaspberryPi4 and Raspberry Pi Zero 2W. It can be cross compiled to various other platforms and integrated to work with AMD64 based PC architectures. 
