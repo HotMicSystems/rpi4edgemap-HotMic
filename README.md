@@ -1,7 +1,7 @@
 # Current TO-DO for this fork:
 ## __**Updates**__
 * Update RNS stack to 0.8.8
-* Update Meshchat to v1.13.2
+* Update Meshchat to v1.18
 * Future to update without breaking links/dependencies
 ## __**Security**__
 * ~~SSL/CA cert~~ Done 09DEC24 -HotMic
