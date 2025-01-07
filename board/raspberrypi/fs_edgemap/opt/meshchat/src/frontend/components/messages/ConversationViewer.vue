@@ -1,53 +1,73 @@
 <template>
 
     <!-- peer selected -->
-    <div v-if="selectedPeer" class="flex flex-col h-full bg-white overflow-hidden sm:m-2 sm:border sm:rounded-xl sm:shadow">
+    <div v-if="selectedPeer" class="flex flex-col h-full bg-white overflow-hidden sm:m-2 sm:border sm:rounded-xl sm:shadow dark:bg-zinc-950 dark:border-zinc-800">
 
         <!-- header -->
-        <div class="flex p-2 border-b border-gray-300">
+        <div class="flex p-2 border-b border-gray-300 dark:border-zinc-800">
+
+            <!-- peer icon -->
+            <div class="my-auto mr-2">
+                <div v-if="selectedPeer.lxmf_user_icon" class="p-2 rounded" :style="{ 'color': selectedPeer.lxmf_user_icon.foreground_colour, 'background-color': selectedPeer.lxmf_user_icon.background_colour }">
+                    <MaterialDesignIcon :icon-name="selectedPeer.lxmf_user_icon.icon_name" class="w-6 h-6"/>
+                </div>
+                <div v-else class="bg-gray-200 dark:bg-zinc-700 text-gray-500 dark:text-gray-400 p-2 rounded">
+                    <MaterialDesignIcon icon-name="account-outline" class="w-6 h-6"/>
+                </div>
+            </div>
 
             <!-- peer info -->
             <div>
                 <div @click="updateCustomDisplayName" class="flex cursor-pointer">
-                    <div v-if="selectedPeer.custom_display_name != null" class="my-auto mr-1" title="Custom Display Name">
+                    <div v-if="selectedPeer.custom_display_name != null" class="my-auto mr-1 dark:text-white" title="Custom Display Name">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z" />
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6Z" />
                         </svg>
                     </div>
-                    <div class="my-auto font-semibold" :title="selectedPeer.display_name">{{ selectedPeer.custom_display_name ?? selectedPeer.display_name }}</div>
+                    <div class="my-auto font-semibold dark:text-white" :title="selectedPeer.display_name">{{ selectedPeer.custom_display_name ?? selectedPeer.display_name }}</div>
                 </div>
-                <div class="text-sm">
-                    <{{ selectedPeer.destination_hash }}>
-                    <span v-if="selectedPeerPath" @click="onDestinationPathClick(selectedPeerPath)" class="cursor-pointer">{{ selectedPeerPath.hops }} {{ selectedPeerPath.hops === 1 ? 'hop' : 'hops' }} away</span>
-                    <span v-if="selectedPeerLxmfStampInfo && selectedPeerLxmfStampInfo.stamp_cost"> • <span @click="onStampInfoClick(selectedPeerLxmfStampInfo)" class="cursor-pointer">Stamp Cost {{ selectedPeerLxmfStampInfo.stamp_cost }}</span></span>
+                <div class="text-sm dark:text-zinc-300">
+
+                    <!-- destination hash -->
+                    <div class="inline-block mr-1">
+                        <div><{{ selectedPeer.destination_hash }}></div>
+                    </div>
+
+                    <div class="inline-block">
+                        <div class="flex space-x-1">
+
+                            <!-- hops away -->
+                            <span v-if="selectedPeerPath" @click="onDestinationPathClick(selectedPeerPath)" class="flex my-auto cursor-pointer">
+                                <span v-if="selectedPeerPath.hops === 0 || selectedPeerPath.hops === 1">Direct</span>
+                                <span v-else>{{ selectedPeerPath.hops }} hops away</span>
+                            </span>
+
+                            <!-- snr -->
+                            <span v-if="selectedPeerSignalMetrics?.snr != null" class="flex my-auto space-x-1">
+                                <span v-if="selectedPeerPath">•</span>
+                                <span @click="onSignalMetricsClick(selectedPeerSignalMetrics)" class="cursor-pointer">SNR {{ selectedPeerSignalMetrics.snr }}</span>
+                            </span>
+
+                            <!-- stamp cost -->
+                            <span v-if="selectedPeerLxmfStampInfo?.stamp_cost" class="flex my-auto space-x-1">
+                                <span v-if="selectedPeerPath || selectedPeerSignalMetrics?.snr != null">•</span>
+                                <span @click="onStampInfoClick(selectedPeerLxmfStampInfo)" class="cursor-pointer">Stamp Cost {{ selectedPeerLxmfStampInfo.stamp_cost }}</span>
+                            </span>
+
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
-            <!-- call button -->
-            <div class="ml-auto my-auto mr-2">
-                <a :href="`call.html?destination_hash=${selectedPeer.destination_hash}`" target="_blank" class="cursor-pointer">
-                    <div class="flex text-gray-700 bg-gray-100 hover:bg-gray-200 p-2 rounded-full">
-                        <div>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z" />
-                            </svg>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-            <!-- delete button -->
-            <div class="my-auto mr-2">
-                <div @click="deleteConversation" class="cursor-pointer">
-                    <div class="flex text-gray-700 bg-gray-100 hover:bg-gray-200 p-2 rounded-full">
-                        <div>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                            </svg>
-                        </div>
-                    </div>
-                </div>
+            <!-- dropdown menu -->
+            <div class="ml-auto my-auto mx-2">
+                <ConversationDropDownMenu
+                    v-if="selectedPeer"
+                    :peer="selectedPeer"
+                    @conversation-deleted="onConversationDeleted"
+                    @set-custom-display-name="updateCustomDisplayName"/>
             </div>
 
             <!-- close button -->
@@ -73,7 +93,7 @@
                 <div v-for="chatItem of selectedPeerChatItemsReversed" :key="chatItem.lxmf_message.hash" class="flex flex-col max-w-xl mt-3" :class="{ 'ml-auto pl-4 md:pl-16 items-end': chatItem.is_outbound, 'mr-auto pr-4 md:pr-16 items-start': !chatItem.is_outbound }">
 
                     <!-- message content -->
-                    <div @click="onChatItemClick(chatItem)" class="border border-gray-300 rounded-xl shadow overflow-hidden" :class="[ chatItem.lxmf_message.state === 'failed' ? 'bg-red-500 text-white' : chatItem.is_outbound ? 'bg-[#3b82f6] text-white' : 'bg-[#efefef]' ]">
+                    <div @click="onChatItemClick(chatItem)" class="border border-gray-300 dark:border-zinc-800 rounded-xl shadow overflow-hidden" :class="[ chatItem.lxmf_message.state === 'failed' ? 'bg-red-500 text-white' : chatItem.is_outbound ? 'bg-[#3b82f6] text-white' : 'bg-[#efefef]' ]">
 
                         <div class="w-full space-y-0.5 px-2.5 py-1">
 
@@ -96,7 +116,7 @@
                                 <!-- audio is not yet loaded -->
                                 <!-- min height to make sure audio player doesn't cause height increase after loading -->
                                 <div v-else style="min-height:54px;" class="flex">
-                                    <button @click="downloadFileFromBase64('audio.bin', chatItem.lxmf_message.fields.audio.audio_bytes)" type="button" class="my-auto flex border border-gray-300 hover:bg-gray-100 rounded px-2 py-1 text-sm text-gray-700 font-semibold cursor-pointer space-x-2 bg-[#efefef]">
+                                    <button @click="downloadFileFromBase64('audio.bin', chatItem.lxmf_message.fields.audio.audio_bytes)" type="button" class="my-auto flex border border-gray-300 dark:border-zinc-800 hover:bg-gray-100 rounded px-2 py-1 text-sm text-gray-700 font-semibold cursor-pointer space-x-2 bg-[#efefef]">
                                         <span class="my-auto">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                                               <path stroke-linecap="round" stroke-linejoin="round" d="m9 9 10.5-3m0 6.553v3.75a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 1 1-.99-3.467l2.31-.66a2.25 2.25 0 0 0 1.632-2.163Zm0 0V2.25L9 5.25v10.303m0 0v3.75a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 0 1-.99-3.467l2.31-.66A2.25 2.25 0 0 0 9 15.553Z" />
@@ -117,7 +137,7 @@
 
                             <!-- file attachment fields -->
                             <div v-if="chatItem.lxmf_message.fields?.file_attachments" class="space-y-1">
-                                <a @click.stop target="_blank" :download="file_attachment.file_name" :href="`data:application/octet-stream;base64,${file_attachment.file_bytes}`" v-for="file_attachment of chatItem.lxmf_message.fields?.file_attachments ?? []" class="flex border border-gray-300 hover:bg-gray-100 rounded px-2 py-1 text-sm text-gray-700 font-semibold cursor-pointer space-x-2 bg-[#efefef]">
+                                <a @click.stop target="_blank" :download="file_attachment.file_name" :href="`data:application/octet-stream;base64,${file_attachment.file_bytes}`" v-for="file_attachment of chatItem.lxmf_message.fields?.file_attachments ?? []" class="flex border border-gray-300 dark:border-zinc-800 hover:bg-gray-100 rounded px-2 py-1 text-sm text-gray-700 font-semibold cursor-pointer space-x-2 bg-[#efefef]">
                                     <div class="my-auto">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="m18.375 12.739-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13"></path>
@@ -209,7 +229,7 @@
         </div>
 
         <!-- send message -->
-        <div class="w-full border-gray-300 border-t p-2">
+        <div class="w-full border-gray-300 dark:border-zinc-800 border-t p-2">
             <div class="mx-auto">
 
                 <!-- message composer -->
@@ -217,14 +237,14 @@
 
                     <!-- image attachment -->
                     <div v-if="newMessageImage" class="mb-2">
-                        <div class="w-32 h-32 rounded shadow border relative overflow-hidden">
+                        <div @click.stop="openImage(newMessageImageUrl)" class="cursor-pointer w-32 h-32 rounded shadow border relative overflow-hidden">
 
                             <!-- image preview -->
                             <img v-if="newMessageImageUrl" :src="newMessageImageUrl" class="w-full h-full object-cover"/>
 
                             <!-- remove button (top right) -->
                             <div class="absolute top-0 right-0 p-1">
-                                <div @click="removeImageAttachment" class="cursor-pointer">
+                                <div @click.stop="removeImageAttachment" class="cursor-pointer">
                                     <div class="flex text-gray-700 bg-gray-100 hover:bg-gray-200 p-1 rounded-full">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
                                             <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
@@ -244,7 +264,7 @@
                     <!-- audio attachment -->
                     <div v-if="newMessageAudio" class="mb-2">
                         <div class="flex flex-wrap gap-1">
-                            <div class="flex border border-gray-300 rounded text-gray-700 divide-x divide-gray-300 overflow-hidden">
+                            <div class="flex border border-gray-300 dark:border-zinc-800 rounded text-gray-700 divide-x divide-gray-300 overflow-hidden">
 
                                 <div class="flex p-1">
 
@@ -276,7 +296,7 @@
                     <!-- file attachments -->
                     <div v-if="newMessageFiles.length > 0" class="mb-2">
                         <div class="flex flex-wrap gap-1">
-                            <div v-for="file in newMessageFiles" class="flex border border-gray-300 rounded text-gray-700 divide-x divide-gray-300 overflow-hidden">
+                            <div v-for="file in newMessageFiles" class="flex border border-gray-300 dark:border-zinc-800 rounded text-gray-700 divide-x divide-gray-300 overflow-hidden dark:border-zinc-800">
                                 <div class="my-auto px-1">
                                     <span class="mr-1">{{ file.name }}</span>
                                     <span class="my-auto text-sm text-gray-500">{{ formatBytes(file.size) }}</span>
@@ -297,7 +317,7 @@
                         v-model="newMessageText"
                         @keydown.enter.exact.native.prevent="onEnterPressed"
                         @keydown.enter.shift.exact.native.prevent="onShiftEnterPressed"
-                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                        class="bg-gray-50 border border-gray-300 dark:border-zinc-800 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-zinc-800 dark:text-zinc-100 dark:border-zinc-900"
                         rows="3"
                         placeholder="Send a message..."></textarea>
 
@@ -305,21 +325,18 @@
                     <div class="flex mt-2">
 
                         <!-- add files -->
-                        <button @click="addFilesToMessage" type="button" class="my-auto mr-1 inline-flex items-center gap-x-1 rounded-md bg-gray-500 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500">
+                        <button @click="addFilesToMessage" type="button" class="my-auto mr-1 inline-flex items-center gap-x-1 rounded-md bg-gray-500 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500 dark:bg-zinc-800 dark:text-white dark:hover:bg-zinc-700 dark:focus-visible:outline-zinc-500">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
                                 <path fill-rule="evenodd" d="M5.625 1.5H9a3.75 3.75 0 0 1 3.75 3.75v1.875c0 1.036.84 1.875 1.875 1.875H16.5a3.75 3.75 0 0 1 3.75 3.75v7.875c0 1.035-.84 1.875-1.875 1.875H5.625a1.875 1.875 0 0 1-1.875-1.875V3.375c0-1.036.84-1.875 1.875-1.875ZM12.75 12a.75.75 0 0 0-1.5 0v2.25H9a.75.75 0 0 0 0 1.5h2.25V18a.75.75 0 0 0 1.5 0v-2.25H15a.75.75 0 0 0 0-1.5h-2.25V12Z" clip-rule="evenodd" />
                                 <path d="M14.25 5.25a5.23 5.23 0 0 0-1.279-3.434 9.768 9.768 0 0 1 6.963 6.963A5.23 5.23 0 0 0 16.5 7.5h-1.875a.375.375 0 0 1-.375-.375V5.25Z" />
                             </svg>
-                            <span class="ml-1 hidden sm:inline-block">Add Files</span>
+                            <span class="ml-1 hidden xl:inline-block whitespace-nowrap">Add Files</span>
                         </button>
 
                         <!-- add image -->
-                        <button @click="addImageToMessage" type="button" class="my-auto mr-1 inline-flex items-center gap-x-1 rounded-md bg-gray-500 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
-                                <path fill-rule="evenodd" d="M1.5 6a2.25 2.25 0 0 1 2.25-2.25h16.5A2.25 2.25 0 0 1 22.5 6v12a2.25 2.25 0 0 1-2.25 2.25H3.75A2.25 2.25 0 0 1 1.5 18V6ZM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0 0 21 18v-1.94l-2.69-2.689a1.5 1.5 0 0 0-2.12 0l-.88.879.97.97a.75.75 0 1 1-1.06 1.06l-5.16-5.159a1.5 1.5 0 0 0-2.12 0L3 16.061Zm10.125-7.81a1.125 1.125 0 1 1 2.25 0 1.125 1.125 0 0 1-2.25 0Z" clip-rule="evenodd" />
-                            </svg>
-                            <span class="ml-1 hidden sm:inline-block">Add Image</span>
-                        </button>
+                        <div>
+                            <AddImageButton @add-image="onImageSelected"/>
+                        </div>
 
                         <!-- add audio -->
                         <div>
@@ -332,10 +349,14 @@
                         </div>
 
                         <!-- send message -->
-                        <button @click="sendMessage" :disabled="!canSendMessage" type="button" class="ml-auto my-auto inline-flex items-center gap-x-1 rounded-md px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2" :class="[ canSendMessage ? 'bg-blue-500 hover:bg-blue-400 focus-visible:outline-blue-500' : 'bg-gray-400 focus-visible:outline-gray-500 cursor-not-allowed']">
-                            <span v-if="isSendingMessage">Sending...</span>
-                            <span v-else>Send</span>
-                        </button>
+                        <div class="ml-auto my-auto">
+                            <SendMessageButton
+                                @send="sendMessage"
+                                @delivery-method-changed="this.newMessageDeliveryMethod = $event"
+                                :is-sending-message="isSendingMessage"
+                                :can-send-message="canSendMessage"
+                                :delivery-method="newMessageDeliveryMethod"/>
+                        </div>
 
                     </div>
 
@@ -345,20 +366,19 @@
         </div>
 
         <!-- hidden file input for selecting files -->
-        <input ref="image-input" @change="onImageInputChange" type="file" accept="image/*" style="display:none"/>
         <input ref="file-input" @change="onFileInputChange" type="file" multiple style="display:none"/>
 
     </div>
 
     <!-- no peer selected -->
     <div v-else class="flex flex-col mx-auto my-auto text-center leading-5">
-        <div class="mx-auto mb-1">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+        <div class="mx-auto mb-1 ">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 dark:text-white">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 0 1-.825-.242m9.345-8.334a2.126 2.126 0 0 0-.476-.095 48.64 48.64 0 0 0-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0 0 11.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
             </svg>
         </div>
-        <div class="font-semibold">No Active Chat</div>
-        <div>Select a Peer to start chatting!</div>
+        <div class="font-semibold dark:text-white">No Active Chat</div>
+        <div class='dark:text-zinc-300'>Select a Peer to start chatting!</div>
     </div>
 
 </template>
@@ -371,10 +391,18 @@ import NotificationUtils from "../../js/NotificationUtils";
 import WebSocketConnection from "../../js/WebSocketConnection";
 import AddAudioButton from "./AddAudioButton.vue";
 import moment from "moment";
+import SendMessageButton from "./SendMessageButton.vue";
+import MaterialDesignIcon from "../MaterialDesignIcon.vue";
+import ConversationDropDownMenu from "./ConversationDropDownMenu.vue";
+import AddImageButton from "./AddImageButton.vue";
 
 export default {
     name: 'ConversationViewer',
     components: {
+        AddImageButton,
+        ConversationDropDownMenu,
+        MaterialDesignIcon,
+        SendMessageButton,
         AddAudioButton,
     },
     props: {
@@ -387,6 +415,7 @@ export default {
 
             selectedPeerPath: null,
             selectedPeerLxmfStampInfo: null,
+            selectedPeerSignalMetrics: null,
 
             lxmfMessagesRequestSequence: 0,
             chatItems: [],
@@ -394,6 +423,7 @@ export default {
             isLoadingPrevious: false,
             hasMorePrevious: true,
 
+            newMessageDeliveryMethod: null,
             newMessageText: "",
             newMessageImage: null,
             newMessageImageUrl: null,
@@ -458,12 +488,16 @@ export default {
             // reset
             this.chatItems = [];
             this.hasMorePrevious = true;
+            this.selectedPeerPath = null;
+            this.selectedPeerLxmfStampInfo = null;
+            this.selectedPeerSignalMetrics = null;
             if(!this.selectedPeer){
                 return;
             }
 
             this.getPeerPath();
             this.getPeerLxmfStampInfo();
+            this.getPeerSignalMetrics();
 
             // load 1 page of previous messages
             await this.loadPrevious();
@@ -533,15 +567,18 @@ export default {
             const json = JSON.parse(message.data);
             switch(json.type){
                 case 'announce': {
-                    // update stamp info if an announce is received from the selected peer
+                    // update stamp info and signal metrics if an announce is received from the selected peer
                     if(json.announce.destination_hash === this.selectedPeer?.destination_hash){
+                        await this.getPeerPath();
                         await this.getPeerLxmfStampInfo();
+                        await this.getPeerSignalMetrics();
                     }
                     break;
                 }
                 case 'lxmf.delivery': {
                     this.onLxmfMessageReceived(json.lxmf_message);
                     await this.getPeerPath();
+                    await this.getPeerSignalMetrics();
                     break;
                 }
                 case 'lxmf_message_created': {
@@ -625,10 +662,6 @@ export default {
             }
         },
         async getPeerPath() {
-
-            // clear previous known path
-            this.selectedPeerPath = null;
-
             if(this.selectedPeer){
                 try {
 
@@ -640,15 +673,14 @@ export default {
 
                 } catch(e) {
                     console.log(e);
+
+                    // clear previous known path
+                    this.selectedPeerPath = null;
+
                 }
             }
-
         },
         async getPeerLxmfStampInfo() {
-
-            // clear previous stamp info
-            this.selectedPeerLxmfStampInfo = null;
-
             if(this.selectedPeer){
                 try {
 
@@ -659,10 +691,34 @@ export default {
                     this.selectedPeerLxmfStampInfo = response.data.lxmf_stamp_info;
 
                 } catch(e) {
+
                     console.log(e);
+
+                    // clear previous stamp info
+                    this.selectedPeerLxmfStampInfo = null;
+
                 }
             }
+        },
+        async getPeerSignalMetrics() {
+            if(this.selectedPeer){
+                try {
 
+                    // get signal metrics
+                    const response = await window.axios.get(`/api/v1/destination/${this.selectedPeer.destination_hash}/signal-metrics`);
+
+                    // update ui
+                    this.selectedPeerSignalMetrics = response.data.signal_metrics;
+
+                } catch(e) {
+
+                    console.log(e);
+
+                    // clear previous signal metrics
+                    this.selectedPeerSignalMetrics = null;
+
+                }
+            }
         },
         onDestinationPathClick(path) {
             DialogUtils.alert(`${path.hops} ${ path.hops === 1 ? 'hop' : 'hops' } away via ${path.next_hop_interface}`);
@@ -701,6 +757,13 @@ export default {
 
             DialogUtils.alert(`This peer has enabled stamp security.\n\nYour device must have a ticket, or solve an automated proof of work task each time you send them a message.\n\nTime per message: ${estimatedTimeForStamp}`);
 
+        },
+        onSignalMetricsClick(signalMetrics) {
+            DialogUtils.alert([
+                `Signal Quality: ${ signalMetrics.quality ?? '???' }%`,
+                `RSSI: ${ signalMetrics.rssi ?? '???' }dBm`,
+                `SNR: ${ signalMetrics.snr  ?? '???'}dB`,
+            ].join("\n"));
         },
         scrollMessagesToBottom: function() {
             // next tick waits for the ui to have the new elements added
@@ -764,25 +827,7 @@ export default {
             }
 
         },
-        async deleteConversation() {
-
-            // do nothing if no peer selected
-            if(!this.selectedPeer){
-                return;
-            }
-
-            // ask user to confirm deleting conversation history
-            if(!confirm("Are you sure you want to delete all messages from this conversation? This can not be undone!")){
-                return;
-            }
-
-            // delete all lxmf messages from "us to destination" and from "destination to us"
-            try {
-                await window.axios.delete(`/api/v1/lxmf-messages/conversation/${this.selectedPeer.destination_hash}`);
-            } catch(e) {
-                DialogUtils.alert("failed to delete conversation");
-                console.log(e);
-            }
+        async onConversationDeleted() {
 
             // reload conversation
             await this.initialLoad();
@@ -1022,6 +1067,7 @@ export default {
 
                 // send message to reticulum
                 const response = await window.axios.post(`/api/v1/lxmf-messages/send`, {
+                    "delivery_method": this.newMessageDeliveryMethod,
                     "lxmf_message": {
                         "destination_hash": this.selectedPeer.destination_hash,
                         "content": this.newMessageText,
@@ -1047,7 +1093,6 @@ export default {
                 this.newMessageImageUrl = null;
                 this.newMessageAudio = null;
                 this.newMessageFiles = [];
-                this.clearImageInput();
                 this.clearFileInput();
 
             } catch(e) {
@@ -1115,31 +1160,31 @@ export default {
             this.$refs["file-input"].value = null;
         },
         removeImageAttachment: function() {
+
+            // ask user to confirm removing image attachment
+            if(!confirm("Are you sure you want to remove this image attachment?")){
+                return;
+            }
+
+            // remove image
             this.newMessageImage = null;
             this.newMessageImageUrl = null;
+
         },
-        onImageInputChange: function(event) {
-            if(event.target.files.length > 0){
+        onImageSelected: function(imageBlob) {
 
-                // update selected file
-                this.newMessageImage = event.target.files[0];
+            // update selected file
+            this.newMessageImage = imageBlob;
 
-                // update image url when file is read
-                const fileReader = new FileReader();
-                fileReader.onload = (event) => {
-                    this.newMessageImageUrl = event.target.result
-                }
-
-                // convert image to data url
-                fileReader.readAsDataURL(this.newMessageImage);
-
-                // clear image input to allow selecting the same file after user removed it
-                this.clearImageInput();
-
+            // update image url when file is read
+            const fileReader = new FileReader();
+            fileReader.onload = (event) => {
+                this.newMessageImageUrl = event.target.result
             }
-        },
-        clearImageInput: function() {
-            this.$refs["image-input"].value = null;
+
+            // convert image to data url
+            fileReader.readAsDataURL(this.newMessageImage);
+
         },
         async startRecordingAudioAttachment(args) {
 
@@ -1327,9 +1372,6 @@ export default {
         },
         addFilesToMessage: function() {
             this.$refs["file-input"].click();
-        },
-        addImageToMessage: function() {
-            this.$refs["image-input"].click();
         },
         findConversation: function(destinationHash) {
             return this.conversations.find((conversation) => {
